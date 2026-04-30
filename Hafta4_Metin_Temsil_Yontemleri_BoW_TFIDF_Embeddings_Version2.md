@@ -148,56 +148,87 @@ pip install scikit-learn
 ### 6.2 Örnek Kod (BoW + TF‑IDF)
 
 ```python
+# sklearn içinden metni sayısal vektörlere çevirmek için kullanılan iki aracı içe aktarır:
+# - CountVectorizer: Bag of Words (kelime sayımı) üretir
+# - TfidfVectorizer: TF-IDF ağırlıklı kelime matrisi üretir
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+# Sonuçları tablo (DataFrame) şeklinde rahat görmek için pandas'ı içe aktarır
 import pandas as pd
 
-# 6 adet mini doküman (ürün yorumu gibi düşünün)
+# 6 adet örnek metin (doküman) listesi oluşturur.
+# Her bir string, tek bir "doküman" gibi düşünülür (ürün yorumu vb.)
 docs = [
-    "Bu ürün çok iyi ve kaliteli",
-    "Ürün kötü çıktı iade etmek istiyorum",
-    "Kargo çok geç geldi",
-    "Kalitesi çok iyi ama fiyatı yüksek",
-    "İade süreci çok zor",
-    "Bu ürün harika çok memnunum"
+    "Bu ürün çok iyi ve kaliteli",              # 1. doküman
+    "Ürün kötü çıktı iade etmek istiyorum",     # 2. doküman
+    "Kargo çok geç geldi",                      # 3. doküman
+    "Kalitesi çok iyi ama fiyatı yüksek",       # 4. doküman
+    "İade süreci çok zor",                      # 5. doküman
+    "Bu ürün harika çok memnunum"               # 6. doküman
 ]
 
 # -----------------------
 # 1) Bag of Words (Count)
 # -----------------------
+
+# CountVectorizer nesnesi oluşturur.
+# lowercase=True: metinleri otomatik olarak küçük harfe çevirir (ör: "Bu" -> "bu").
+# Ama dikkat: Türkçe 'İ/I' dönüşümlerinde bazen beklenmedik sonuçlar olabilir (detay istersen anlatabilirim).
 count_vec = CountVectorizer(lowercase=True)
+
+# fit_transform iki işi birden yapar:
+# 1) fit: docs içindeki tüm kelimelerden sözlük (vocabulary) çıkarır (hangi kelimeler var?)
+# 2) transform: her dokümanı bu sözlüğe göre sayısal vektöre çevirir (kelime sayımı)
+# X_count sonucu genelde "sparse matrix"tir (seyrek matris), çünkü çoğu hücre 0 olur.
 X_count = count_vec.fit_transform(docs)
 
+# Oluşturulan sözlükteki kelimeleri (özellik adlarını) alır.
+# Çıktı: kelime listesi (kolon isimleri gibi düşünebilirsiniz).
 vocab_count = count_vec.get_feature_names_out()
 
+# Seyrek matrisi (X_count) normal dense (tam) matrise çevirir: toarray()
+# Sonra bu matrisi, kolon isimleri vocab_count olacak şekilde pandas DataFrame'e çevirir.
+# df_count: satırlar dokümanlar, sütunlar kelimeler, değerler kelime sayılarıdır.
 df_count = pd.DataFrame(X_count.toarray(), columns=vocab_count)
+
+# Ekrana başlık yazdırır (çıktıyı ayırt etmek için)
 print("=== BoW (Count) Matrisi ===")
+
+# BoW sayım matrisini yazdırır.
+# Burada her satır: ilgili dokümanda hangi kelime kaç kez geçmiş onu gösterir.
 print(df_count)
 
 # -----------------------
 # 2) TF-IDF
 # -----------------------
+
+# TfidfVectorizer nesnesi oluşturur.
+# lowercase=True: metinleri küçük harfe çevirir.
+# Varsayılan ayarlarla:
+# - kelime token’larını çıkarır,
+# - her kelime için TF-IDF ağırlığı hesaplar.
 tfidf_vec = TfidfVectorizer(lowercase=True)
+
+# fit_transform yine iki işi birden yapar:
+# 1) fit: TF-IDF sözlüğünü oluşturur (kelimeleri belirler)
+# 2) transform: her dokümanı TF-IDF ağırlıklarıyla vektöre çevirir
+# X_tfidf sonucu yine sparse matrix olur (çoğu değer 0).
 X_tfidf = tfidf_vec.fit_transform(docs)
 
+# TF-IDF tarafındaki sözlüğün kelime listesini (özellik adlarını) alır.
 vocab_tfidf = tfidf_vec.get_feature_names_out()
+
+# TF-IDF matrisini dense matrise çevirir, sonra DataFrame'e aktarır.
+# df_tfidf: satırlar dokümanlar, sütunlar kelimeler,
+# değerler ise kelime sayısı değil TF-IDF skorudur.
 df_tfidf = pd.DataFrame(X_tfidf.toarray(), columns=vocab_tfidf)
 
+# BoW çıktısından sonra araya boş satır koyarak TF-IDF başlığı yazdırır.
 print("\n=== TF-IDF Matrisi (Yuvarlatılmış) ===")
+
+# TF-IDF değerleri genelde uzun ondalıklı çıkar.
+# round(2): tabloyu daha okunur yapmak için 2 basamağa yuvarlar.
 print(df_tfidf.round(2))
-```
-
-### 6.3 Çıktıyı Nasıl Okuyacağız?
-
-**BoW matrisi için:**
-- Her satır bir dokümandır.
-- Her sütun bir kelimedir.
-- Hücre değeri: o kelimenin o dokümanda **kaç kez geçtiği**
-
-**TF‑IDF matrisi için:**
-- Yine satır=doküman, sütun=kelime.
-- Hücre değeri: kelimenin dokümandaki **önem skoru** (0 ile 1 arası gibi düşünebilirsiniz).
-- “çok”, “bu”, “ürün” gibi kelimeler her dokümanda geçiyorsa TF‑IDF’leri görece daha düşük olabilir.
-
 ---
 
 ## 7. Sık Yapılan Hatalar / Dikkat Edilecek Noktalar
