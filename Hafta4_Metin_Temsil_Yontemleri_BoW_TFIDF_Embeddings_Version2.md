@@ -173,29 +173,26 @@ docs = [
 
 # CountVectorizer nesnesi oluşturur.
 # lowercase=True: metinleri otomatik olarak küçük harfe çevirir (ör: "Bu" -> "bu").
-# Ama dikkat: Türkçe 'İ/I' dönüşümlerinde bazen beklenmedik sonuçlar olabilir (detay istersen anlatabilirim).
+# Ama dikkat: Türkçe 'İ/I' dönüşümlerinde bazen beklenmedik sonuçlar olabilir.
 count_vec = CountVectorizer(lowercase=True)
 
 # fit_transform iki işi birden yapar:
-# 1) fit: docs içindeki tüm kelimelerden sözlük (vocabulary) çıkarır (hangi kelimeler var?)
+# 1) fit: docs içindeki tüm kelimelerden sözlük (vocabulary) çıkarır
 # 2) transform: her dokümanı bu sözlüğe göre sayısal vektöre çevirir (kelime sayımı)
 # X_count sonucu genelde "sparse matrix"tir (seyrek matris), çünkü çoğu hücre 0 olur.
 X_count = count_vec.fit_transform(docs)
 
 # Oluşturulan sözlükteki kelimeleri (özellik adlarını) alır.
-# Çıktı: kelime listesi (kolon isimleri gibi düşünebilirsiniz).
 vocab_count = count_vec.get_feature_names_out()
 
-# Seyrek matrisi (X_count) normal dense (tam) matrise çevirir: toarray()
-# Sonra bu matrisi, kolon isimleri vocab_count olacak şekilde pandas DataFrame'e çevirir.
-# df_count: satırlar dokümanlar, sütunlar kelimeler, değerler kelime sayılarıdır.
+# Seyrek matrisi normal dense (tam) matrise çevirir: toarray()
+# Sonra bu matrisi kolon isimleri vocab_count olacak şekilde DataFrame'e çevirir.
 df_count = pd.DataFrame(X_count.toarray(), columns=vocab_count)
 
-# Ekrana başlık yazdırır (çıktıyı ayırt etmek için)
+# Başlık yazdırır
 print("=== BoW (Count) Matrisi ===")
 
 # BoW sayım matrisini yazdırır.
-# Burada her satır: ilgili dokümanda hangi kelime kaç kez geçmiş onu gösterir.
 print(df_count)
 
 # -----------------------
@@ -203,34 +200,27 @@ print(df_count)
 # -----------------------
 
 # TfidfVectorizer nesnesi oluşturur.
-# lowercase=True: metinleri küçük harfe çevirir.
-# Varsayılan ayarlarla:
-# - kelime token’larını çıkarır,
-# - her kelime için TF-IDF ağırlığı hesaplar.
+# Varsayılan ayarlarla kelime token’larını çıkarır ve TF-IDF hesaplar.
 tfidf_vec = TfidfVectorizer(lowercase=True)
 
-# fit_transform yine iki işi birden yapar:
-# 1) fit: TF-IDF sözlüğünü oluşturur (kelimeleri belirler)
-# 2) transform: her dokümanı TF-IDF ağırlıklarıyla vektöre çevirir
-# X_tfidf sonucu yine sparse matrix olur (çoğu değer 0).
+# fit_transform: sözlüğü öğrenir ve dokümanları TF-IDF vektörlerine çevirir.
 X_tfidf = tfidf_vec.fit_transform(docs)
 
-# TF-IDF tarafındaki sözlüğün kelime listesini (özellik adlarını) alır.
+# TF-IDF sözlüğündeki kelimeleri (özellik adlarını) alır.
 vocab_tfidf = tfidf_vec.get_feature_names_out()
 
-# TF-IDF matrisini dense matrise çevirir, sonra DataFrame'e aktarır.
-# df_tfidf: satırlar dokümanlar, sütunlar kelimeler,
-# değerler ise kelime sayısı değil TF-IDF skorudur.
+# TF-IDF matrisini dense matrise çevirir ve DataFrame'e aktarır.
 df_tfidf = pd.DataFrame(X_tfidf.toarray(), columns=vocab_tfidf)
 
-# BoW çıktısından sonra araya boş satır koyarak TF-IDF başlığı yazdırır.
+# TF-IDF başlığı yazdırır.
 print("\n=== TF-IDF Matrisi (Yuvarlatılmış) ===")
 
-# TF-IDF değerleri genelde uzun ondalıklı çıkar.
-# round(2): tabloyu daha okunur yapmak için 2 basamağa yuvarlar.
+# TF-IDF değerlerini daha okunur yapmak için 2 basamağa yuvarlar ve yazdırır.
 print(df_tfidf.round(2))
+```
+
 ---
-```python
+
 ## 7. Sık Yapılan Hatalar / Dikkat Edilecek Noktalar
 
 1. **Ön işleme yapmadan temsil çıkarmak**  
