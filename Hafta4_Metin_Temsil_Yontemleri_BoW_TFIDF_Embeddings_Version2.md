@@ -230,7 +230,7 @@ print("\n=== TF-IDF Matrisi (Yuvarlatılmış) ===")
 # round(2): tabloyu daha okunur yapmak için 2 basamağa yuvarlar.
 print(df_tfidf.round(2))
 ---
-
+```python
 ## 7. Sık Yapılan Hatalar / Dikkat Edilecek Noktalar
 
 1. **Ön işleme yapmadan temsil çıkarmak**  
